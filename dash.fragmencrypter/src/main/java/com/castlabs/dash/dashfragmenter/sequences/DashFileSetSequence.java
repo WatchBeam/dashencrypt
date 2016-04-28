@@ -88,8 +88,8 @@ public class DashFileSetSequence {
     protected int clearlead = 0;
     protected String encryptionAlgo = "cenc";
     protected boolean explode = false;
-    protected String mediaPattern = "$RepresentationID$/media-$Time$.mp4";
-    protected String initPattern = "$RepresentationID$/init.mp4";
+    protected String mediaPattern = "$RepresentationID$_$Time$.m4s";
+    protected String initPattern = "$RepresentationID$_init.mp4";
 
     protected String mainLang = "eng";
     protected boolean avc1ToAvc3 = false;
@@ -631,7 +631,7 @@ public class DashFileSetSequence {
 
 
     public void writeManifest(MPDDocument mpdDocument) throws IOException, ExitCodeException {
-        File manifest1 = new File(outputDirectory, "Manifest.mpd");
+        File manifest1 = new File(outputDirectory, "manifest.mpd");
         LOG.info("Writing " + manifest1);
         mpdDocument.save(manifest1, getXmlOptions());
         //LOG.info("Done.");
@@ -801,13 +801,13 @@ public class DashFileSetSequence {
             originalFilename = originalFilename.replaceAll(".ac3$", "");
             originalFilename = originalFilename.replaceAll(".dtshd$", "");
             originalFilename = originalFilename.replaceAll(".mp4$", "");
-            for (TrackProxy track1 : filenames.keySet()) {
-                if (track1 != track &&
-                        trackOriginalFilename.get(track1).equals(trackOriginalFilename.get(track))) {
-                    // ouch multiple tracks point to same file
-                    originalFilename += "_" + track.getTrackMetaData().getTrackId();
-                }
+
+            if (track.getTrackMetaData().getWidth() > 0) {
+                originalFilename += "_video";
+            } else {
+                originalFilename += "_audio";
             }
+
             if (!explode) {
                 filenames.put(track, String.format("%s.mp4", originalFilename));
             } else {
